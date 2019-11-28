@@ -1,0 +1,223 @@
+php --help ------------------> connaitre commande
+
+php -S localhost:8000 -t public ------------------> port 80 
+
+
+php bin/console server:run ------------------> symfony
+
+
+
+
+-----------------------------------------------------------------------------------------
+				Commande github
+-----------------------------------------------------------------------------------------
+Création d'un projet dans github (web)
+git clone adressehttp
+
+php -S localhost:8000 -t . ------------------> permet d'avoir un serveur web
+
+commit
+
+git add .
+git commit -m "objet du commit"
+
+
+
+
+
+-----------------------------------------------------------------------------------------
+				Installation symfony
+-----------------------------------------------------------------------------------------
+Install php 7.1
+composer
+git
+
+composer create-project symfony/websites-skeleton slamquiz => Crée un projet avec symfony
+
+
+
+
+-----------------------------------------------------------------------------------------
+				Créer controller
+-----------------------------------------------------------------------------------------
+php bin/console make:controller
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------
+# 1) Création de l'entité :
+bin/console make:entity
+-> Category 
+-> shortname -> Enter -> 50 -> no 
+-> longname -> Enter -> 255 -> no 
+
+
+
+# 2) Ajout d'annotations (dans la classe  App\Entity\Category)
+use Doctrine\ORM\Mapping\Table;
+
+
+ - au dessus de la classe : 
+ * @ORM\Table(name="tbl_category")
+
+ - au dessus de id :
+     * @var int The id of this category
+     * @ORM\Id()
+     * @ORM\GeneratedValue(strategy="AUTO")
+
+
+ - au dessus de shortname :
+    /**
+     * @var string The shortname of the category
+     * @ORM\Column(type="string", length=50)
+
+ - au dessus de longname :
+     * @var string The longname of the category
+     * @ORM\Column(type="string", length=255)
+
+
+
+
+
+
+
+# 3) Tester le schéma : 
+bin/console doctrine:schema:create --dump-sql
+# et vérifier la présence du prefix 'tbl_' devant le nom de la table
+
+
+
+
+
+
+
+
+# 4) Création de la migration : 
+bin/console doctrine:migrations:diff 
+bin/console doctrine:migrations:migrate
+-> y
+
+
+
+
+--------------------------------------------------------------------------
+# 1) Création des fixtures : 
+bin/console make:fixtures
+# si besoin : composer require orm-fixtures --dev            
+-> CategoryFixtures 
+
+
+# 2) Ajouter, dans UserFixtures.php, l'import de la classe de l'entité concernée
+---------------------------------------------------------------
+use App\Entity\Category;
+---------------------------------------------------------------
+
+
+
+# 3) Compléter la méthode load :
+---------------------------------------------------------------
+        // POO
+        $category = new Category();
+        $category->setShortname('POO');
+        $category->setLongname('Programmation Orientée Objet');
+        $manager->persist($category);
+
+        // PHP
+        $category = new Category();
+        $category->setShortname('PHP');
+        $category->setLongname('Langage PHP');
+        $manager->persist($category);
+
+        // Symfony 4
+        $category = new Category();
+        $category->setShortname('Symf4');
+        $category->setLongname('Symfony version 4');
+        $manager->persist($category);
+---------------------------------------------------------------
+
+
+# 5) Charger les fixtures
+bin/console doctrine:fixtures:load
+-> y
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------
+git branch -a
+git status
+git add .
+git commit -m "[Tests] Create 'Category' fixtures #22"
+git flow feature publish category-fixtures
+---------------------------------------------------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------------------------------------------------
+# Si besoin de petites modifications 
+git checkout feature/category-fixtures; git add . ; 
+git commit -m "[Tests] Create 'Category' fixtures #22"
+git checkout develop; git merge feature/category-fixtures; git push
+---------------------------------------------------------------------------------------------------------------
+
+
+
+
+---------------------------------------------------------------------------------------------------------------
+# Une fois que l'on est sûr que la branch de dév de la feature fonctionne bien, on fusionne et on la supprime :
+git flow feature finish category-fixtures
+# on se retrouve dans la branch develop, que l'on va envoyer
+git push
+---------------------------------------------------------------------------------------------------------------
+
+
+
+
+# 1) Créer le fichier src/Controller/CategoryController.php : 
+bin/console make:crud
+-> Category
+
+
+
+# 2) Ajouter ces lignes dans le fichier 'templates/base.html.twig' :
+---------------------------------------------------------------
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('category_index') }}">Category</a>
+                    </li>
+---------------------------------------------------------------
+
+
+
+# 3) Pour trier les catégories par ordre alphabétique, 
+#    ajouter cette méthode dans le fichier 'src/Repository/CategoryRepository.php' : 
+---------------------------------------------------------------
+    public function findAll()
+    {
+        $builder = $this->createQueryBuilder('c');
+        $builder->orderBy('c.longname', 'ASC');
+        return $builder->getQuery()->getResult();
+    }
+---------------------------------------------------------------
+
+
+
+# 4) Transformer le lien en bouton, en ajoutant   class="btn btn-primary" 
+     dans le fichier  templates\category\index.html.twig
+---------------------------------------------------------------
+    <a  class="btn btn-primary" href="{{ path('category_new') }}">Create new</a>
+---------------------------------------------------------------
+
+
+
+
+
+-----------------------------------------------------------------------------------------
+				       Traduction
+-----------------------------------------------------------------------------------------
+php bin/console translation:update --force fr
